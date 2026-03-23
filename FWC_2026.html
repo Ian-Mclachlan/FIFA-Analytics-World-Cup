@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FIFA 2026 Medical Surge Command Center</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Share+Tech+Mono&family=Barlow:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-deep: #020810;
+  --bg: #0a1628;
+  --bg-card: #0d1f3c;
+  --bg-card-hover: #112748;
+  --border: #1a3a6a;
+  --border-glow: #1e5aaa;
+  /* PRIMARY BLUES — the operational palette */
+  --blue-100: #e0edff;
+  --blue-300: #7fb5ff;
+  --blue-400: #4d94ff;
+  --blue-500: #2d7ff9;
+  --blue-600: #1a5ec4;
+  --blue-700: #0f3d8a;
+  --blue-800: #0a2a5e;
+  --blue-900: #061a3d;
+  --blue-dim: rgba(45,127,249,0.1);
+  --blue-glow: rgba(45,127,249,0.15);
+  /* ALERTS ONLY */
+  --amber: #ffa726;
+  --amber-dim: rgba(255,167,38,0.1);
+  --red: #ff4757;
+  --red-dim: rgba(255,71,87,0.1);
+  /* Text scale */
+  --text: #c8d6e5;
+  --text-bright: #f0f4f8;
+  --text-dim: #4a6785;
+  --display: 'Orbitron', sans-serif;
+  --mono: 'Share Tech Mono', monospace;
+  --body: 'Barlow', sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{font-size:14px;}
+body{
+  font-family:var(--body);
+  background:var(--bg-deep);
+  color:var(--text);
+  min-height:100vh;
+  overflow-x:hidden;
+}
+
+/* === BACKGROUND EFFECTS === */
+body::before {
+  content:'';position:fixed;inset:0;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% 0%, rgba(0,100,200,0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 20% 80%, rgba(0,212,255,0.04) 0%, transparent 50%),
+    radial-gradient(ellipse 60% 40% at 80% 80%, rgba(0,100,200,0.04) 0%, transparent 50%);
+  pointer-events:none;z-index:0;
+}
+
+/* === HEADER === */
+.header {
+  position:relative;z-index:1;
+  padding:16px 24px 12px;
+  border-bottom:1px solid var(--border);
+  background:linear-gradient(180deg, rgba(45,127,249,0.04) 0%, transparent 100%);
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;
+}
+.header-left h1 {
+  font-family:var(--display);font-size:1rem;font-weight:700;
+  letter-spacing:0.12em;text-transform:uppercase;
+  background:linear-gradient(90deg,var(--blue-300),var(--blue-500));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.header-left .subtitle {
+  font-family:var(--mono);font-size:0.7rem;color:var(--text-dim);margin-top:2px;letter-spacing:0.04em;
+}
+.header-right {display:flex;gap:8px;align-items:center;}
+.toggle-inputs-btn {
+  font-family:var(--mono);font-size:0.68rem;
+  padding:6px 14px;border-radius:4px;cursor:pointer;
+  background:var(--blue-dim);border:1px solid rgba(45,127,249,0.25);color:var(--blue-300);
+  transition:all 0.2s;letter-spacing:0.04em;
+}
+.toggle-inputs-btn:hover{background:var(--blue-glow);}
+
+/* === ALERT STRIP === */
+.alert-strip {
+  position:relative;z-index:1;
+  padding:10px 24px;
+  font-family:var(--mono);font-size:0.75rem;
+  display:flex;align-items:center;gap:10px;
+  transition:all 0.4s;
+  border-bottom:1px solid var(--border);
+}
+.alert-strip.green{background:var(--blue-dim);color:var(--blue-300);border-bottom-color:rgba(45,127,249,0.2);}
+.alert-strip.amber{background:var(--amber-dim);color:var(--amber);border-bottom-color:rgba(255,167,38,0.2);}
+.alert-strip.red{background:var(--red-dim);color:var(--red);border-bottom-color:rgba(255,71,87,0.3);
+  animation:alertPulse 2s ease-in-out infinite;
+}
+@keyframes alertPulse{0%,100%{opacity:1;}50%{opacity:0.85;}}
+
+/* === INPUT PANEL (collapsible) === */
+.input-panel {
+  position:relative;z-index:1;
+  max-height:0;overflow:hidden;
+  transition:max-height 0.5s ease, padding 0.3s;
+  background:var(--bg);
+  border-bottom:1px solid var(--border);
+}
+.input-panel.open {max-height:600px;padding:16px 24px;}
+.input-grid {
+  display:grid;grid-template-columns:repeat(auto-fill, minmax(160px,1fr));gap:10px;
+}
+.input-grid .field label {
+  display:block;font-family:var(--mono);font-size:0.58rem;
+  text-transform:uppercase;letter-spacing:0.06em;color:var(--text-dim);margin-bottom:3px;
+}
+.input-grid .field input,.input-grid .field select {
+  width:100%;padding:6px 8px;font-family:var(--mono);font-size:0.78rem;
+  background:var(--bg-deep);color:var(--text-bright);
+  border:1px solid var(--border);border-radius:3px;outline:none;
+}
+.input-grid .field input:focus,.input-grid .field select:focus {
+  border-color:var(--blue-400);box-shadow:0 0 6px rgba(45,127,249,0.15);
+}
+.input-grid .field select{cursor:pointer;}
+.input-grid .field select option{background:var(--bg-card);}
+.input-section-label {
+  grid-column:1/-1;font-family:var(--mono);font-size:0.6rem;
+  text-transform:uppercase;letter-spacing:0.1em;color:var(--blue-400);
+  padding:8px 0 2px;border-top:1px solid var(--border);margin-top:4px;
+}
+.input-section-label:first-child{border-top:none;margin-top:0;}
+.hi-inline {
+  font-family:var(--display);font-size:0.9rem;font-weight:700;
+  color:var(--blue-300);text-align:center;padding:6px;
+  background:var(--blue-dim);border:1px solid rgba(45,127,249,0.2);border-radius:3px;
+}
+
+/* === MAIN DASHBOARD === */
+.dashboard {
+  position:relative;z-index:1;
+  padding:16px 20px;
+  display:grid;
+  grid-template-columns:1fr 1.8fr 1fr;
+  grid-template-rows:auto auto auto;
+  gap:14px;
+  max-width:1400px;margin:0 auto;
+}
+
+/* === MODEL CARDS === */
+.model-card {
+  background:var(--bg-card);
+  border:1px solid var(--border);
+  border-radius:6px;
+  padding:14px;
+  position:relative;
+  overflow:hidden;
+  transition:border-color 0.3s, box-shadow 0.3s;
+}
+.model-card:hover {
+  border-color:var(--border-glow);
+  box-shadow:0 0 20px rgba(0,100,200,0.08);
+}
+.model-card::before {
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:var(--blue-500);opacity:0.5;
+}
+.card-header {
+  display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;
+}
+.card-title {
+  font-family:var(--display);font-size:0.6rem;font-weight:600;
+  letter-spacing:0.1em;text-transform:uppercase;color:var(--blue-300);
+}
+.card-badge {
+  font-family:var(--mono);font-size:0.55rem;
+  padding:2px 8px;border-radius:2px;
+  background:var(--blue-dim);color:var(--text-dim);
+}
+.card-value {
+  font-family:var(--display);font-size:1.8rem;font-weight:800;
+  color:var(--text-bright);line-height:1;margin:6px 0 4px;
+}
+.card-unit {font-family:var(--mono);font-size:0.62rem;color:var(--text-dim);}
+.card-ci {
+  font-family:var(--mono);font-size:0.6rem;color:var(--blue-300);
+  background:var(--blue-dim);padding:3px 8px;border-radius:2px;
+  display:inline-block;margin-top:6px;
+}
+.card-note {font-size:0.6rem;color:var(--text-dim);margin-top:6px;font-style:italic;}
+
+/* Card shade variants — lighter/darker blue instead of amber/red */
+.model-card.light-accent::before{background:var(--blue-300);}
+.model-card.light-accent .card-title{color:var(--blue-300);}
+.model-card.dark-accent::before{background:var(--blue-700);}
+.model-card.dark-accent .card-title{color:var(--blue-400);}
+
+/* UVa special */
+.uva-badge {
+  font-family:var(--display);font-size:0.72rem;font-weight:700;
+  padding:6px 12px;border-radius:3px;display:inline-block;
+  letter-spacing:0.06em;margin-top:4px;
+}
+.uva-minor{background:var(--blue-dim);color:var(--blue-300);border:1px solid rgba(45,127,249,0.25);}
+.uva-inter{background:rgba(45,127,249,0.15);color:var(--blue-100);border:1px solid rgba(45,127,249,0.35);}
+.uva-major{background:var(--red-dim);color:var(--red);border:1px solid rgba(255,71,87,0.25);}
+
+/* Heat bar */
+.heat-track{width:100%;height:6px;background:var(--bg-deep);border-radius:3px;overflow:hidden;margin:6px 0 4px;}
+.heat-fill{height:100%;border-radius:3px;transition:width 0.5s;}
+.heat-fill.mod{background:linear-gradient(90deg,var(--blue-600),var(--blue-400));}
+.heat-fill.sev{background:linear-gradient(90deg,var(--blue-400),var(--blue-100));}
+
+/* NEDOCS bar */
+.nedocs-track{width:100%;height:8px;background:var(--bg-deep);border-radius:4px;overflow:hidden;margin:6px 0;}
+.nedocs-fill{height:100%;border-radius:4px;transition:width 0.5s,background 0.4s;}
+.nedocs-labels{display:flex;justify-content:space-between;font-family:var(--mono);font-size:0.5rem;color:var(--text-dim);}
+
+/* === CENTER WATERFALL === */
+.waterfall-panel {
+  grid-column:2;grid-row:1/4;
+  background:var(--bg-card);
+  border:1px solid var(--border);
+  border-radius:6px;
+  padding:16px;
+  display:flex;flex-direction:column;
+  position:relative;overflow:hidden;
+}
+.waterfall-panel::before {
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--blue-700),var(--blue-400),var(--blue-700));opacity:0.6;
+}
+.waterfall-title {
+  font-family:var(--display);font-size:0.65rem;font-weight:600;
+  letter-spacing:0.1em;text-transform:uppercase;color:var(--blue-300);margin-bottom:4px;
+}
+.waterfall-subtitle {
+  font-family:var(--mono);font-size:0.58rem;color:var(--text-dim);margin-bottom:12px;
+}
+canvas#waterfallCanvas {width:100%;flex:1;min-height:300px;}
+
+/* === SUMMARY STRIP === */
+.summary-strip {
+  grid-column:1/-1;
+  background:var(--bg-card);border:1px solid var(--border);border-radius:6px;
+  padding:14px 16px;
+  display:grid;grid-template-columns:repeat(4,1fr);gap:12px;
+}
+.summary-kpi {text-align:center;padding:8px;background:var(--bg-deep);border-radius:4px;}
+.summary-kpi .sk-val {
+  font-family:var(--display);font-size:1.1rem;font-weight:700;color:var(--text-bright);
+}
+.summary-kpi .sk-label {
+  font-family:var(--mono);font-size:0.52rem;color:var(--text-dim);
+  text-transform:uppercase;letter-spacing:0.06em;margin-top:2px;
+}
+
+/* === EVIDENCE FOOTER === */
+.evidence-bar {
+  position:relative;z-index:1;
+  padding:10px 24px;
+  border-top:1px solid var(--border);
+  font-family:var(--mono);font-size:0.55rem;color:var(--text-dim);
+  display:flex;gap:24px;flex-wrap:wrap;
+  background:var(--bg);
+}
+.ev-item{display:flex;align-items:center;gap:5px;}
+.ev-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.ev-dot.t1{background:var(--blue-300);}.ev-dot.t2{background:var(--blue-600);}.ev-dot.t3{background:var(--text-dim);}
+
+/* === RESPONSIVE === */
+@media(max-width:1100px){
+  .dashboard{grid-template-columns:1fr 1fr;grid-template-rows:auto;}
+  .waterfall-panel{grid-column:1/-1;grid-row:auto;min-height:350px;}
+  .summary-strip{grid-template-columns:repeat(2,1fr);}
+}
+@media(max-width:700px){
+  .dashboard{grid-template-columns:1fr;}
+  .input-grid{grid-template-columns:repeat(2,1fr);}
+  .summary-strip{grid-template-columns:1fr 1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-left">
+    <h1>FIFA 2026 Medical Surge</h1>
+    <div class="subtitle">Advanced Forecasting Command Center — Probabilistic Engine v3.0</div>
+  </div>
+  <div class="header-right">
+    <span id="hiPill" class="toggle-inputs-btn" style="cursor:default;">HI: —</span>
+    <button class="toggle-inputs-btn" onclick="toggleInputs()">▼ Parameters</button>
+  </div>
+</div>
+
+<!-- ALERT -->
+<div class="alert-strip green" id="alertStrip">
+  <span id="alertIcon">✅</span>
+  <span id="alertMsg">System operating within conventional capacity constraints.</span>
+</div>
+
+<!-- COLLAPSIBLE INPUTS -->
+<div class="input-panel open" id="inputPanel">
+  <div class="input-grid">
+    <div class="input-section-label">Event Parameters</div>
+    <div class="field"><label>Attendance</label><input type="number" id="attendance" min="1000" max="200000" step="1000" value="65000"></div>
+    <div class="field"><label>Temp (°F)</label><input type="number" id="temperature" min="50" max="120" step="1" value="85"></div>
+    <div class="field"><label>Humidity (%)</label><input type="number" id="humidity" min="10" max="100" step="1" value="50"></div>
+    <div class="field"><label>Kickoff (24h)</label><input type="number" id="kickoffHour" min="0" max="23" step="1" value="18"></div>
+    <div class="field"><label>Venue</label>
+      <select id="bounded"><option value="1">Bounded (Stadium)</option><option value="0">Unbounded (Open)</option></select>
+    </div>
+    <div class="field"><label>Seating</label>
+      <select id="seated"><option value="1">Mostly Seated</option><option value="0">Standing / Mobile</option></select>
+    </div>
+    <div class="field"><label>Environment</label>
+      <select id="environment"><option value="outdoor">Outdoor</option><option value="indoor">Indoor</option></select>
+    </div>
+    <div class="field"><label>Event Type</label>
+      <select id="eventType"><option value="sport">Sporting Event</option><option value="nonSport">Concert / Other</option></select>
+    </div>
+    <div class="field"><label>Duration</label>
+      <select id="dayNight"><option value="1">Day &amp; Night</option><option value="0">Single Period</option></select>
+    </div>
+
+    <div class="input-section-label">UVa Threat Modifiers</div>
+    <div class="field"><label>Spectator Age</label>
+      <select id="ageGroup"><option value="0">Younger</option><option value="1">Mixed</option><option value="2">Older (High Risk)</option></select>
+    </div>
+    <div class="field"><label>Crowd Mood</label>
+      <select id="crowdIntent"><option value="0">Calm</option><option value="1">Intermediate</option><option value="2">Animated / Hostile</option></select>
+    </div>
+    <div class="field"><label>Alcohol</label>
+      <select id="alcohol"><option value="0">None</option><option value="1">Limited</option><option value="2">Significant</option></select>
+    </div>
+
+    <div class="input-section-label">Hospital Baseline (NEDOCS)</div>
+    <div class="field"><label>ED Census</label><input type="number" id="census" min="0" value="45"></div>
+    <div class="field"><label>ED Beds</label><input type="number" id="edBeds" min="1" value="50"></div>
+    <div class="field"><label>Boarders</label><input type="number" id="boarders" min="0" value="8"></div>
+    <div class="field"><label>Hospital Beds</label><input type="number" id="hospBeds" min="1" value="400"></div>
+    <div class="field"><label>Vents (ED)</label><input type="number" id="vents" min="0" value="2"></div>
+    <div class="field"><label>Wait (hrs)</label><input type="number" id="waitTime" min="0" value="4"></div>
+    <div class="field"><label>Last Bed (hrs)</label><input type="number" id="lastDischarge" min="0" value="1"></div>
+  </div>
+</div>
+
+<!-- DASHBOARD GRID -->
+<div class="dashboard">
+
+  <!-- TOP LEFT: ARBON -->
+  <div class="model-card" style="grid-column:1;grid-row:1;">
+    <div class="card-header">
+      <span class="card-title">Arbon Regression</span>
+      <span class="card-badge">Tier 1</span>
+    </div>
+    <div class="card-value" id="arbonVal">0</div>
+    <div class="card-unit">Patient encounters</div>
+    <div class="card-ci" id="arbonCI">95% CI: — to —</div>
+    <div id="arbonDesc" class="card-note">Bounded / Seated / Outdoor — Peer-reviewed MGM regression</div>
+  </div>
+
+  <!-- TOP RIGHT: FIFA -->
+  <div class="model-card" style="grid-column:3;grid-row:1;">
+    <div class="card-header">
+      <span class="card-title">FIFA CWC 2025</span>
+      <span class="card-badge">Tier 2</span>
+    </div>
+    <div class="card-value" id="fifaEncVal">0</div>
+    <div class="card-unit">Stadium encounters</div>
+    <div class="card-ci" id="fifaEncCI">95% CI: — to —</div>
+    <div class="card-note">Derived from 63 US stadium matches — pending external validation</div>
+  </div>
+
+  <!-- MID LEFT: PERRON (MODERATE HEAT) -->
+  <div class="model-card light-accent" style="grid-column:1;grid-row:2;">
+    <div class="card-header">
+      <span class="card-title">Perron — Moderate Heat</span>
+      <span class="card-badge">0.15 / 10°F</span>
+    </div>
+    <div style="display:flex;align-items:baseline;gap:12px;">
+      <div>
+        <div class="card-value" id="perronTotal" style="color:var(--blue-300);">0</div>
+        <div class="card-unit">Total heat-adjusted patients</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-family:var(--display);font-size:0.9rem;font-weight:600;color:var(--text-dim);" id="perronPPR">0.31</div>
+        <div class="card-unit">PPR / 1k</div>
+      </div>
+    </div>
+    <div class="heat-track"><div class="heat-fill mod" id="perronFill"></div></div>
+    <div class="card-note">Moderate heat-surge scenario per Perron et al.</div>
+  </div>
+
+  <!-- MID RIGHT: BAIRD (SEVERE HEAT) -->
+  <div class="model-card dark-accent" style="grid-column:3;grid-row:2;">
+    <div class="card-header">
+      <span class="card-title">Baird — Severe Heat</span>
+      <span class="card-badge">0.30 / 10°F</span>
+    </div>
+    <div style="display:flex;align-items:baseline;gap:12px;">
+      <div>
+        <div class="card-value" id="bairdTotal" style="color:var(--blue-100);">0</div>
+        <div class="card-unit">Total heat-adjusted patients</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-family:var(--display);font-size:0.9rem;font-weight:600;color:var(--text-dim);" id="bairdPPR">0.31</div>
+        <div class="card-unit">PPR / 1k</div>
+      </div>
+    </div>
+    <div class="heat-track"><div class="heat-fill sev" id="bairdFill"></div></div>
+    <div class="card-note">Severe heat-surge scenario per Baird et al.</div>
+  </div>
+
+  <!-- BOTTOM LEFT: UVa -->
+  <div class="model-card" style="grid-column:1;grid-row:3;" id="uvaCard">
+    <div class="card-header">
+      <span class="card-title">UVa Transport Model</span>
+      <span class="card-badge">Tier 2</span>
+    </div>
+    <div id="uvaBadge" class="uva-badge uva-minor">MINOR — EMS ONLY</div>
+    <div style="margin-top:8px;">
+      <span class="card-unit">Score: </span>
+      <span style="font-family:var(--display);font-size:0.9rem;font-weight:700;color:var(--text-bright);" id="uvaScore">0</span>
+      <span class="card-unit"> / 10</span>
+    </div>
+    <div class="card-note">Published categorical staging — resource deployment guide</div>
+  </div>
+
+  <!-- BOTTOM RIGHT: NEDOCS -->
+  <div class="model-card" style="grid-column:3;grid-row:3;" id="nedocsCard">
+    <div class="card-header">
+      <span class="card-title">NEDOCS — ED Overcrowding</span>
+      <span class="card-badge">Tier 1</span>
+    </div>
+    <div style="display:flex;align-items:baseline;gap:10px;">
+      <div class="card-value" id="nedocsScore">0</div>
+      <span id="nedocsStage" class="uva-badge uva-minor" style="font-size:0.6rem;">Normal</span>
+    </div>
+    <div class="nedocs-track"><div class="nedocs-fill" id="nedocsFill"></div></div>
+    <div class="nedocs-labels">
+      <span>0</span><span>50</span><span>100</span><span>140</span><span>200</span>
+    </div>
+    <div class="card-note">Industry-standard ED crowding metric — universally validated</div>
+  </div>
+
+  <!-- CENTER: WATERFALL -->
+  <div class="waterfall-panel">
+    <div class="waterfall-title">Patient Flow — Generation → Deflection → Grid Impact</div>
+    <div class="waterfall-subtitle">Central projection with Qatar 2022 aspirational intervention targets</div>
+    <canvas id="waterfallCanvas"></canvas>
+  </div>
+
+  <!-- BOTTOM: SUMMARY -->
+  <div class="summary-strip">
+    <div class="summary-kpi">
+      <div class="sk-val" id="sumTotal">0</div>
+      <div class="sk-label">Total Patients (FIFA)</div>
+    </div>
+    <div class="summary-kpi">
+      <div class="sk-val" style="color:var(--blue-300);" id="sumDeflected">0</div>
+      <div class="sk-label">Virtual Care Deflection (25%)</div>
+    </div>
+    <div class="summary-kpi">
+      <div class="sk-val" style="color:var(--blue-400);" id="sumTransports">0</div>
+      <div class="sk-label">Ambulance Transports (FIFA)</div>
+    </div>
+    <div class="summary-kpi">
+      <div class="sk-val" id="sumNedocs">0</div>
+      <div class="sk-label">NEDOCS Post-Surge</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- EVIDENCE FOOTER -->
+<div class="evidence-bar">
+  <div class="ev-item"><span class="ev-dot t1"></span>Tier 1 Validated: NEDOCS, Arbon, NWS Heat Index</div>
+  <div class="ev-item"><span class="ev-dot t2"></span>Tier 2 Evidence-Based: UVa, Baird/Perron, FIFA CWC 2025</div>
+  <div class="ev-item"><span class="ev-dot t3"></span>Tier 3 Aspirational: Qatar 2022 Telehealth Deflection</div>
+  <div class="ev-item" style="margin-left:auto;color:var(--text-dim);">Locked: Baseline PPR 0.31/1k · Heat Floor 85°F</div>
+</div>
+
+<script>
+// ============================================================
+// ENGINE — Constants & Core Functions
+// ============================================================
+const BASELINE_PPR=0.31, BASELINE_HI=85.0, MC_N=10000;
+
+function computeHI(T,RH){
+  if(T<80)return T;
+  const c=[-42.379,2.04901523,10.14333127,-0.22475541,-0.00683783,-0.05481717,0.00122874,0.00085282,-0.00000199];
+  let h=c[0]+c[1]*T+c[2]*RH+c[3]*T*RH+c[4]*T*T+c[5]*RH*RH+c[6]*T*T*RH+c[7]*T*RH*RH+c[8]*T*T*RH*RH;
+  if(RH<13&&T>=80&&T<=112)h-=((13-RH)/4)*Math.sqrt((17-Math.abs(T-95))/17);
+  if(RH>85&&T>=80&&T<=87)h+=((RH-85)/10)*((87-T)/5);
+  return h;
+}
+function rn(m,s){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return m+s*Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+
+function mc(bT,bH,bA,bHr,fn){
+  const r=[];
+  for(let i=0;i<MC_N;i++){
+    const t=Math.max(50,rn(bT,3)),h=Math.max(10,Math.min(100,rn(bH,5))),a=Math.max(1000,rn(bA,bA*0.05));
+    r.push(Math.max(0,fn(t,h,a,bHr)));
+  }
+  r.sort((a,b)=>a-b);
+  return{lo:r[Math.floor(MC_N*0.025)],hi:r[Math.floor(MC_N*0.975)],med:r[Math.floor(MC_N*0.5)],all:r};
+}
+
+const fifaEncFn=(t,h,a,hr)=>-0.078+0.184*t-4.41*(h/100)-0.639*hr+0.000219*a;
+const fifaTransFn=(t,h,a,hr)=>-3.348+0.0667*t-1.01*(h/100)-0.072*hr+0.0000343*a;
+function arbonFn(se,bo,ind,out,sp,h,a,dn){
+  return-78.184699-31.488567*se+84.556898*bo+42.37024*ind+81.319501*out-20.39094*sp-0.616134*h-0.000456*a+0.000016246*a*h+20.067439*dn;
+}
+
+// ============================================================
+// WATERFALL CHART (Canvas)
+// ============================================================
+function drawWaterfall(canvas, stages){
+  const dpr=window.devicePixelRatio||1;
+  const rect=canvas.getBoundingClientRect();
+  canvas.width=rect.width*dpr;canvas.height=rect.height*dpr;
+  const ctx=canvas.getContext('2d');
+  ctx.scale(dpr,dpr);
+  const W=rect.width,H=rect.height;
+  ctx.clearRect(0,0,W,H);
+
+  const pad={l:50,r:20,t:40,b:50};
+  const plotW=W-pad.l-pad.r;
+  const plotH=H-pad.t-pad.b;
+
+  const n=stages.length;
+  const barW=Math.min(plotW/n*0.55, 70);
+  const gap=(plotW-barW*n)/(n+1);
+
+  // Find scale
+  const maxVal=Math.max(...stages.map(s=>Math.abs(s.cumTop)),
+                        ...stages.map(s=>Math.abs(s.cumBottom)),1);
+  const scale=plotH/maxVal*0.85;
+  const baseline=pad.t+plotH*0.15; // 0 line near top since values are positive
+
+  // Colors
+  const colors={total:'#2d7ff9',deflect:'#7fb5ff',transport:'#4d94ff',ed:'#1a5ec4',residual:'#0f3d8a'};
+
+  for(let i=0;i<n;i++){
+    const s=stages[i];
+    const x=pad.l+gap+(gap+barW)*i;
+    const top=baseline+Math.min(s.cumTop,s.cumBottom)*scale;
+    const bot=baseline+Math.max(s.cumTop,s.cumBottom)*scale;
+    const h=Math.max(1,bot-top);
+
+    // Bar
+    ctx.fillStyle=colors[s.type]||'#2d7ff9';
+    ctx.globalAlpha=0.85;
+    ctx.beginPath();
+    ctx.roundRect(x,top,barW,h,3);
+    ctx.fill();
+    ctx.globalAlpha=1;
+
+    // Glow
+    ctx.shadowColor=colors[s.type]||'#2d7ff9';
+    ctx.shadowBlur=12;
+    ctx.fillStyle=colors[s.type]||'#2d7ff9';
+    ctx.globalAlpha=0.15;
+    ctx.fillRect(x,top,barW,h);
+    ctx.globalAlpha=1;
+    ctx.shadowBlur=0;
+
+    // Connector line to next bar
+    if(i<n-1){
+      ctx.strokeStyle='rgba(200,214,229,0.15)';
+      ctx.lineWidth=1;
+      ctx.setLineDash([3,3]);
+      ctx.beginPath();
+      ctx.moveTo(x+barW, s.type==='total'?bot:top);
+      ctx.lineTo(x+barW+gap, s.type==='total'?bot:top);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+
+    // Value label — always above the bar
+    ctx.fillStyle='#f0f4f8';
+    ctx.font='bold 13px Orbitron, sans-serif';
+    ctx.textAlign='center';
+    const valY=top-10;
+    ctx.fillText(Math.abs(Math.round(s.value)), x+barW/2, valY);
+
+    // Category label
+    ctx.fillStyle='#4a6785';
+    ctx.font='10px Share Tech Mono, monospace';
+    ctx.textAlign='center';
+    // Wrap long labels
+    const words=s.label.split(' ');
+    let lineY=H-pad.b+14;
+    let line='';
+    for(const w of words){
+      const test=line+w+' ';
+      if(ctx.measureText(test).width>barW+gap*0.5&&line){
+        ctx.fillText(line.trim(),x+barW/2,lineY);
+        lineY+=12;line=w+' ';
+      }else{line=test;}
+    }
+    ctx.fillText(line.trim(),x+barW/2,lineY);
+  }
+
+  // Zero baseline
+  ctx.strokeStyle='rgba(45,127,249,0.15)';
+  ctx.lineWidth=1;
+  ctx.beginPath();
+  ctx.moveTo(pad.l,baseline);
+  ctx.lineTo(W-pad.r,baseline);
+  ctx.stroke();
+}
+
+// ============================================================
+// TOGGLE INPUTS
+// ============================================================
+function toggleInputs(){
+  document.getElementById('inputPanel').classList.toggle('open');
+}
+
+// ============================================================
+// MAIN CALCULATE
+// ============================================================
+function calculate(){
+  const v=id=>parseFloat(document.getElementById(id).value)||0;
+  const vi=id=>parseInt(document.getElementById(id).value);
+
+  const attend=v('attendance'),temp=v('temperature'),hum=v('humidity'),hour=v('kickoffHour');
+  const bounded=vi('bounded'),seated=vi('seated');
+  const env=document.getElementById('environment').value;
+  const indoor=env==='indoor'?1:0, outdoor=env==='outdoor'?1:0;
+  const sport=document.getElementById('eventType').value==='sport'?1:0;
+  const dayNight=vi('dayNight');
+  const ageGroup=vi('ageGroup'),crowdIntent=vi('crowdIntent'),alcohol=vi('alcohol');
+  const census=v('census'),edBeds=Math.max(1,v('edBeds')),boarders=v('boarders');
+  const hospBeds=Math.max(1,v('hospBeds')),vents=v('vents'),waitTime=v('waitTime'),lastDisch=v('lastDischarge');
+
+  // Heat Index
+  const hi=computeHI(temp,hum);
+  const hiPill=document.getElementById('hiPill');
+  hiPill.textContent='HI: '+hi.toFixed(0)+'°F';
+  hiPill.style.color=hi>=105?'var(--red)':hi>=95?'var(--amber)':'var(--blue-300)';
+  hiPill.style.borderColor=hi>=105?'rgba(255,71,87,0.3)':hi>=95?'rgba(255,167,38,0.3)':'rgba(45,127,249,0.3)';
+  hiPill.style.background=hi>=105?'var(--red-dim)':hi>=95?'var(--amber-dim)':'var(--blue-dim)';
+
+  const deltaHI=Math.max(0,(hi-BASELINE_HI)/10);
+
+  // --- FIFA ---
+  let fifaEnc=Math.max(0,fifaEncFn(temp,hum,attend,hour));
+  let fifaTrans=Math.max(0,fifaTransFn(temp,hum,attend,hour));
+  const mcE=mc(temp,hum,attend,hour,fifaEncFn);
+  const mcT=mc(temp,hum,attend,hour,fifaTransFn);
+
+  document.getElementById('fifaEncVal').textContent=Math.round(fifaEnc);
+  document.getElementById('fifaEncCI').textContent=`95% CI: ${Math.round(mcE.lo)} to ${Math.round(mcE.hi)}`;
+
+  // --- ARBON ---
+  let arbon=Math.max(0,arbonFn(seated,bounded,indoor,outdoor,sport,hum,attend,dayNight));
+  const mcA=mc(temp,hum,attend,hour,(t,h,a,hr)=>arbonFn(seated,bounded,indoor,outdoor,sport,h,a,dayNight));
+
+  document.getElementById('arbonVal').textContent=Math.round(arbon);
+  document.getElementById('arbonCI').textContent=`95% CI: ${Math.round(mcA.lo)} to ${Math.round(mcA.hi)}`;
+  const venueDesc=bounded?'Bounded':'Unbounded';
+  const seatDesc=seated?'Seated':'Standing';
+  const envDesc=outdoor?'Outdoor':'Indoor';
+  document.getElementById('arbonDesc').textContent=`${venueDesc} / ${seatDesc} / ${envDesc} — Peer-reviewed MGM regression`;
+
+  // --- HEAT SENSITIVITY ---
+  const perronPPR=BASELINE_PPR+(deltaHI*0.15);
+  const bairdPPR=BASELINE_PPR+(deltaHI*0.30);
+  const perronTotal=Math.round(perronPPR*(attend/1000));
+  const bairdTotal=Math.round(bairdPPR*(attend/1000));
+
+  document.getElementById('perronPPR').textContent=perronPPR.toFixed(2);
+  document.getElementById('bairdPPR').textContent=bairdPPR.toFixed(2);
+  document.getElementById('perronTotal').textContent=perronTotal;
+  document.getElementById('bairdTotal').textContent=bairdTotal;
+  document.getElementById('perronFill').style.width=Math.min(100,(perronPPR/3)*100)+'%';
+  document.getElementById('bairdFill').style.width=Math.min(100,(bairdPPR/3)*100)+'%';
+
+  // --- UVa ---
+  let uvaPts=alcohol+ageGroup+crowdIntent;
+  if(temp>90)uvaPts+=2;else if(temp>=80)uvaPts+=1;
+  if(attend>50000)uvaPts+=2;else if(attend>=15000)uvaPts+=1;
+  document.getElementById('uvaScore').textContent=uvaPts;
+  const badge=document.getElementById('uvaBadge');
+  if(uvaPts>5){badge.textContent='MAJOR — FIELD HOSPITAL';badge.className='uva-badge uva-major';}
+  else if(uvaPts>=3){badge.textContent='INTERMEDIATE — PHYSICIAN ON-SITE';badge.className='uva-badge uva-inter';}
+  else{badge.textContent='MINOR — EMS ONLY';badge.className='uva-badge uva-minor';}
+
+  // --- NEDOCS ---
+  let ned=Math.max(0,Math.round(85.8*(census/edBeds)+600*(boarders/hospBeds)+13.4*vents+0.93*waitTime+5.64*lastDisch-20));
+  document.getElementById('nedocsScore').textContent=ned;
+  const ns=document.getElementById('nedocsStage');
+  let nedText,nedCol;
+  if(ned>180){nedText='Disaster';nedCol='var(--red)';}
+  else if(ned>140){nedText='Severe';nedCol='var(--red)';}
+  else if(ned>100){nedText='Crowded';nedCol='var(--amber)';}
+  else if(ned>50){nedText='Busy';nedCol='var(--blue-300)';}
+  else{nedText='Normal';nedCol='var(--blue-300)';}
+  ns.textContent=nedText;
+  ns.className='uva-badge '+(ned>140?'uva-major':ned>100?'uva-inter':'uva-minor');
+  const nf=document.getElementById('nedocsFill');
+  nf.style.width=Math.min(100,ned/200*100)+'%';
+  nf.style.background=ned>140?'linear-gradient(90deg,var(--amber),var(--red))':ned>100?'linear-gradient(90deg,var(--blue-400),var(--amber))':'var(--blue-500)';
+
+  // --- WATERFALL ---
+  const deflection25=Math.round(fifaEnc*0.25);
+  const postDeflection=Math.round(fifaEnc)-deflection25;
+  const edArrivals=Math.round(fifaTrans);
+
+  const stages=[
+    {label:'Total Generated (FIFA)',value:Math.round(fifaEnc),cumTop:0,cumBottom:Math.round(fifaEnc),type:'total'},
+    {label:'Virtual Care Deflected (25%)',value:-deflection25,cumTop:Math.round(fifaEnc),cumBottom:Math.round(fifaEnc)-deflection25,type:'deflect'},
+    {label:'On-Site Treatment',value:-(postDeflection-edArrivals),cumTop:Math.round(fifaEnc)-deflection25,cumBottom:edArrivals+deflection25>Math.round(fifaEnc)?edArrivals:edArrivals,type:'residual'},
+    {label:'Ambulance Transports',value:edArrivals,cumTop:0,cumBottom:edArrivals,type:'transport'},
+  ];
+
+  // Fix cumulative math for waterfall
+  let running=Math.round(fifaEnc);
+  stages[0].cumTop=0;stages[0].cumBottom=running;
+  // deflection
+  stages[1].cumTop=running;running-=deflection25;stages[1].cumBottom=running;
+  // on-site
+  const onsite=running-edArrivals;
+  stages[2].cumTop=running;running-=Math.max(0,onsite);stages[2].cumBottom=running;
+  // transports
+  stages[3].cumTop=0;stages[3].cumBottom=edArrivals;stages[3].value=edArrivals;
+
+  drawWaterfall(document.getElementById('waterfallCanvas'),stages);
+
+  // --- SUMMARY ---
+  document.getElementById('sumTotal').textContent=Math.round(fifaEnc);
+  document.getElementById('sumDeflected').textContent=deflection25;
+  document.getElementById('sumTransports').textContent=Math.round(fifaTrans);
+  document.getElementById('sumNedocs').textContent=ned;
+  document.getElementById('sumNedocs').style.color=ned>140?'var(--red)':ned>100?'var(--amber)':'var(--blue-300)';
+
+  // --- ALERT ---
+  const strip=document.getElementById('alertStrip');
+  const aMsg=document.getElementById('alertMsg');
+  const aIcon=document.getElementById('alertIcon');
+  if(temp>=98){
+    strip.className='alert-strip red';
+    aMsg.innerHTML='<strong>CRITICAL:</strong> Heat-casualty threshold ≥98°F. Initiate deflection protocols.';
+    aIcon.textContent='🚨';
+  }else if(ned>=140){
+    strip.className='alert-strip red';
+    aMsg.innerHTML=`<strong>SYSTEM FAILURE:</strong> NEDOCS ${ned}. Acute care grid saturated.`;
+    aIcon.textContent='🚨';
+  }else if(uvaPts>5||ned>=100||uvaPts>=3||perronPPR>0.8||fifaTrans>8){
+    strip.className='alert-strip amber';
+    let r=[];
+    if(uvaPts>5)r.push(`UVa MAJOR (${uvaPts}) — stage field hospital`);
+    else if(uvaPts>=3)r.push(`UVa Intermediate (${uvaPts})`);
+    if(ned>=100)r.push(`NEDOCS ${ned}`);
+    if(perronPPR>0.8)r.push(`PPR ${perronPPR.toFixed(2)}`);
+    if(fifaTrans>8)r.push(`${Math.round(fifaTrans)} transports`);
+    aMsg.innerHTML=`<strong>ELEVATED:</strong> ${r.join(' · ')}`;
+    aIcon.textContent='⚠️';
+  }else{
+    strip.className='alert-strip green';
+    aMsg.textContent='System operating within conventional capacity constraints.';
+    aIcon.textContent='✅';
+  }
+}
+
+// ============================================================
+// LISTENERS & INIT
+// ============================================================
+document.querySelectorAll('input,select').forEach(el=>el.addEventListener('input',calculate));
+window.addEventListener('resize',calculate);
+calculate();
+</script>
+</body>
+</html>
